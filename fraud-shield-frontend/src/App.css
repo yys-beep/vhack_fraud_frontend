@@ -25,8 +25,8 @@ body {
   display: flex;
   gap: 24px;
   width: 100%;
-  max-width: 1000px;
-  flex-wrap: wrap; /* Allows cards to stack on smaller screens */
+  max-width: 1200px; /* <--- Allows the cards to breathe */
+  flex-wrap: wrap; 
   margin-bottom: 30px;
 }
 
@@ -89,7 +89,14 @@ body {
 .res-approve { color: #166534; }
 
 /* --- History Table --- */
-.history-card { width: 100%; max-width: 1000px; background: white; border-radius: 24px; padding: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+.history-card { 
+  width: 100%; 
+  max-width: 100%; /* <--- This stretches it to the webpage edges */
+  background: white; 
+  border-radius: 24px; 
+  padding: 24px; 
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
+}
 
 /* This wrapper enables horizontal scrolling on phones */
 .table-responsive {
@@ -107,7 +114,20 @@ body {
 .badge-blocked { background: #fee2e2; color: #991b1b; padding: 4px 10px; border-radius: 20px; font-weight: 600; font-size: 12px; white-space: nowrap; }
 .badge-version { background: #e0e7ff; color: #4338ca; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; white-space: nowrap; }
 
-.acc-input { background: transparent; border: none; color: white; font-size: 11px; opacity: 0.8; outline: none; width: 100%; margin-top: 5px; }
+.acc-input { 
+  background: rgba(255, 255, 255, 0.1); 
+  border: 1px solid rgba(255, 255, 255, 0.2); 
+  border-radius: 6px;
+  padding: 8px 10px;
+  color: white; 
+  font-size: 13px; 
+  outline: none; 
+  width: 100%; 
+}
+
+.acc-input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
 
 .spin { animation: spin 1s linear infinite; }
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }

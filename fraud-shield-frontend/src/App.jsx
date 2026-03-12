@@ -1,51 +1,68 @@
 import React, { useState } from 'react';
 import { ShieldAlert, ShieldCheck, Send, User, Info, RefreshCw, History, Clock, Hash, Download, AlertTriangle } from 'lucide-react';
 import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import autoTable from 'jspdf-autotable'; // <-- Using the fixed import!
 import './App.css';
 
 const API_URL = "https://vhack-fraud-backend.onrender.com"; 
 
 function App() {
   const [balance, setBalance] = useState(150000);
-  const [recipient, setRecipient] = useState("EduMatch-Admin");
+  
+  // NEW: Added Sender Details to track both sides of the transaction
+  const [senderName, setSenderName] = useState("mimibig"); 
   const [senderAcc, setSenderAcc] = useState("ACC-7742-XY");
+  
+  const [recipient, setRecipient] = useState("EduMatch-Admin");
   const [recipientAcc, setRecipientAcc] = useState("ACC-9901-EM");
   const [amount, setAmount] = useState(5000);
   const [type, setType] = useState("TRANSFER");
-  const [hour, setHour] = useState(new Date().getHours());
+  
+  // NEW: Converted to a proper time string for the Time Picker (HH:MM)
+  const [txTime, setTxTime] = useState("15:00"); 
+  
   const [loading, setLoading] = useState(false);
   const [aiResult, setAiResult] = useState(null);
   const [history, setHistory] = useState([]);
-  
-  // NEW: Toggle for presenting to judges
   const [isAttackMode, setIsAttackMode] = useState(false); 
 
   const downloadPDF = () => {
-    const doc = new jsPDF();
+    // NEW: Changed to 'landscape' so all the new columns fit perfectly!
+    const doc = new jsPDF('landscape'); 
     doc.text('FraudShield Security Report', 14, 20);
-    const tableColumn = ["Time", "From", "To", "Amount", "Status"];
-    const tableRows = history.map(tx => [tx.time, tx.from, tx.to, `$${tx.amount.toLocaleString()}`, tx.status]);
     
-    // THE MAGIC FIX IS ON THIS LINE:
+    // NEW: Expanded PDF Columns
+    const tableColumn = ["Time", "Sender Name", "Sender Acc", "Recipient Name", "Recipient Acc", "Amount", "Status"];
+    
+    // NEW: Expanded PDF Rows
+    const tableRows = history.map(tx => [
+      tx.time, 
+      tx.senderName, 
+      tx.senderAcc, 
+      tx.recipient, 
+      tx.recipientAcc, 
+      `$${tx.amount.toLocaleString()}`, 
+      tx.status
+    ]);
+    
     autoTable(doc, { startY: 30, head: [tableColumn], body: tableRows });
-    
     doc.save('FraudShield_Report.pdf');
   };
-  
+
   const handleTransfer = async () => {
     setLoading(true);
     setAiResult(null);
 
     const transferAmount = parseFloat(amount);
     const isLiquidation = (balance - transferAmount) === 0;
+    
+    // The AI only needs the 'hour' integer (0-23). We extract it from "HH:MM"
+    const parsedHour = parseInt(txTime.split(':')[0], 10);
 
-    // MATCHING THE NEW API EXACTLY
     const payload = {
-      step: parseInt(hour),
+      step: parsedHour, 
       amount: transferAmount,
       oldbalanceOrg: balance,
-      // If Attack Mode is ON, we corrupt the math. If OFF, normal math.
       newbalanceOrig: isAttackMode ? balance : (balance - transferAmount), 
       oldbalanceDest: 0,
       newbalanceDest: transferAmount,
@@ -63,10 +80,13 @@ function App() {
       const data = await response.json();
       setAiResult({ ...data, isLiquidation }); 
       
+      // NEW: Saving all the expanded details into the history log
       setHistory([{ 
-        time: `${hour}:00`, 
-        from: senderAcc, 
-        to: recipient, 
+        time: txTime, 
+        senderName: senderName,
+        senderAcc: senderAcc,
+        recipient: recipient, 
+        recipientAcc: recipientAcc,
         amount: transferAmount, 
         status: data.status 
       }, ...history]);
@@ -95,11 +115,22 @@ function App() {
           <div className="balance-section">
             <small>WALLET BALANCE</small>
             <h1 style={{margin:0}}>${balance.toLocaleString()}</h1>
-            <input 
-              className="acc-input"
-              value={senderAcc} 
-              onChange={(e) => setSenderAcc(e.target.value)} 
-            />
+            
+            {/* NEW: Added Sender Name next to Sender Account */}
+            <div style={{display:'flex', gap:'10px', marginTop:'10px'}}>
+              <input 
+                className="acc-input"
+                value={senderName} 
+                onChange={(e) => setSenderName(e.target.value)} 
+                title="Account Holder Name"
+              />
+              <input 
+                className="acc-input"
+                value={senderAcc} 
+                onChange={(e) => setSenderAcc(e.target.value)} 
+                title="Account Number"
+              />
+            </div>
           </div>
 
           <div className="input-group">
@@ -113,8 +144,9 @@ function App() {
               <input className="input-field" value={recipientAcc} onChange={(e)=>setRecipientAcc(e.target.value)} />
             </div>
             <div style={{flex:1}}>
-              <label className="label"><Clock size={14} /> Time (0-23)</label>
-              <input type="number" className="input-field" value={hour} onChange={(e)=>setHour(e.target.value)} />
+              <label className="label"><Clock size={14} /> Local Time</label>
+              {/* NEW: Native HTML5 Time Picker */}
+              <input type="time" className="input-field" value={txTime} onChange={(e)=>setTxTime(e.target.value)} />
             </div>
           </div>
 
@@ -132,7 +164,6 @@ function App() {
             </div>
           </div>
 
-          {/* ATTACK MODE TOGGLE */}
           <div style={{display:'flex', alignItems:'center', gap:'10px', marginBottom:'20px', padding:'10px', background: isAttackMode ? '#fef2f2' : '#f8fafc', borderRadius:'8px', border: isAttackMode ? '1px solid #fecaca' : '1px solid #e2e8f0'}}>
             <input 
               type="checkbox" 
@@ -181,22 +212,35 @@ function App() {
         </div>
       </div>
 
-      <div>
-        <div className="history-card">
-          <div style={{display:'flex', justifyContent:'space-between', marginBottom:'15px', alignItems:'center'}}>
-            <h3 style={{margin:0}}>Security Audit Log</h3>
-            <button onClick={downloadPDF} className="btn-secondary"><Download size={14}/> Export PDF</button>
-          </div>
+      <div className="history-card">
+        <div style={{display:'flex', justifyContent:'space-between', marginBottom:'15px', alignItems:'center'}}>
+           <h3 style={{margin:0}}>Security Audit Log</h3>
+           <button onClick={downloadPDF} className="btn-secondary"><Download size={14}/> Export PDF</button>
+        </div>
+        
+        {/* NEW: Expanded Table Headers */}
+        <div className="table-responsive">
           <table className="history-table">
             <thead>
-              <tr><th>Time</th><th>To Account</th><th>Amount</th><th>Status</th></tr>
+              <tr>
+                <th>Time</th>
+                <th>Sender Name</th>
+                <th>Sender Acc</th>
+                <th>Recipient Name</th>
+                <th>Recipient Acc</th>
+                <th>Amount</th>
+                <th>Status</th>
+              </tr>
             </thead>
             <tbody>
               {history.map((tx, i) => (
                 <tr key={i}>
                   <td>{tx.time}</td>
-                  <td>{tx.to}</td>
-                  <td>${tx.amount.toLocaleString()}</td>
+                  <td>{tx.senderName}</td>
+                  <td style={{fontFamily: 'monospace', color: '#64748b'}}>{tx.senderAcc}</td>
+                  <td>{tx.recipient}</td>
+                  <td style={{fontFamily: 'monospace', color: '#64748b'}}>{tx.recipientAcc}</td>
+                  <td style={{fontWeight: '600'}}>${tx.amount.toLocaleString()}</td>
                   <td><span className={tx.status === 'Approved' ? 'badge-approved' : 'badge-blocked'}>{tx.status}</span></td>
                 </tr>
               ))}
