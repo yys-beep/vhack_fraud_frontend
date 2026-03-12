@@ -1,12 +1,24 @@
-/* Container Layout */
+/* --- Global Resets & Base --- */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: #f8fafc;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box; /* This prevents padding from breaking widths on mobile */
+}
+
+/* --- Container Layout --- */
 .page {
   min-height: 100vh;
-  background-color: #f8fafc;
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 40px 20px;
-  font-family: 'Inter', system-ui, sans-serif;
 }
 
 .app-container {
@@ -14,14 +26,15 @@
   gap: 24px;
   width: 100%;
   max-width: 1000px;
-  flex-wrap: wrap;
+  flex-wrap: wrap; /* Allows cards to stack on smaller screens */
   margin-bottom: 30px;
 }
 
-/* Cards */
+/* --- Cards --- */
 .card {
   flex: 1;
-  min-width: 350px;
+  min-width: 300px; /* Reduced from 350px so it fits mobile */
+  width: 100%;
   background-color: #fff;
   padding: 32px;
   border-radius: 24px;
@@ -36,43 +49,20 @@
   margin-bottom: 24px;
 }
 
-/* Inputs & Buttons */
+/* --- Inputs & Buttons --- */
 .input-group { margin-bottom: 16px; }
-.input-row { display: flex; gap: 16px; margin-bottom: 24px; }
+.input-row { display: flex; gap: 16px; margin-bottom: 24px; width: 100%; }
+.input-row > div { flex: 1; }
+
 .label { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: #64748b; margin-bottom: 6px; }
-.input-field { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; box-sizing: border-box; font-size: 15px; }
-.btn-primary { width: 100%; padding: 16px; background-color: #0f172a; color: #fff; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: 0.2s; }
+.input-field { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; font-size: 15px; outline: none; transition: 0.2s; }
+.input-field:focus { border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+
+.btn-primary { width: 100%; padding: 16px; color: #fff; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: 0.2s; }
 .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+.btn-secondary { background: #f1f5f9; color: #475569; border: none; padding: 8px 12px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 13px; }
 
-/* Results & History Table */
-.history-card { width: 100%; max-width: 1000px; background: white; border-radius: 24px; padding: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-.history-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-.history-table th { text-align: left; padding: 12px; color: #64748b; font-size: 13px; border-bottom: 1px solid #f1f5f9; }
-.history-table td { padding: 14px 12px; font-size: 14px; border-bottom: 1px solid #f8fafc; }
-
-.badge-approved { background: #dcfce7; color: #166534; padding: 4px 10px; border-radius: 20px; font-weight: 600; font-size: 12px; }
-.badge-blocked { background: #fee2e2; color: #991b1b; padding: 4px 10px; border-radius: 20px; font-weight: 600; font-size: 12px; }
-
-.badge-version {
-  background: #e0e7ff;
-  color: #4338ca;
-  padding: 4px 10px;
-  border-radius: 8px;
-  font-size: 11px;
-  font-weight: 700;
-}
-
-.acc-input {
-  background: transparent;
-  border: none;
-  color: white;
-  font-size: 11px;
-  opacity: 0.8;
-  outline: none;
-  width: 100%;
-  margin-top: 5px;
-}
-
+/* --- Results --- */
 .result-card {
   display: flex;
   flex-direction: column;
@@ -94,17 +84,72 @@
   border: 1px solid #f1f5f9;
 }
 
-.empty-state {
-  text-align: center;
-  color: #94a3b8;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 15px;
-}
-
+.empty-state { text-align: center; color: #94a3b8; display: flex; flex-direction: column; align-items: center; gap: 15px; }
 .res-block { color: #991b1b; }
 .res-approve { color: #166534; }
 
+/* --- History Table --- */
+.history-card { width: 100%; max-width: 1000px; background: white; border-radius: 24px; padding: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+
+/* This wrapper enables horizontal scrolling on phones */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch; 
+}
+
+.history-table { width: 100%; border-collapse: collapse; margin-top: 15px; min-width: 500px; }
+.history-table th { text-align: left; padding: 12px; color: #64748b; font-size: 13px; border-bottom: 1px solid #f1f5f9; }
+.history-table td { padding: 14px 12px; font-size: 14px; border-bottom: 1px solid #f8fafc; }
+
+/* --- Badges & Misc --- */
+.badge-approved { background: #dcfce7; color: #166534; padding: 4px 10px; border-radius: 20px; font-weight: 600; font-size: 12px; white-space: nowrap; }
+.badge-blocked { background: #fee2e2; color: #991b1b; padding: 4px 10px; border-radius: 20px; font-weight: 600; font-size: 12px; white-space: nowrap; }
+.badge-version { background: #e0e7ff; color: #4338ca; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+
+.acc-input { background: transparent; border: none; color: white; font-size: 11px; opacity: 0.8; outline: none; width: 100%; margin-top: 5px; }
+
 .spin { animation: spin 1s linear infinite; }
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+
+/* =========================================
+   RESPONSIVE DESIGN (Mobiles & Tablets) 
+   ========================================= */
+
+/* For Tablets (iPad) and smaller */
+@media (max-width: 850px) {
+  .app-container {
+    flex-direction: column; /* Stack cards vertically */
+  }
+  .result-card {
+    min-height: 250px; /* Take up less height when stacked */
+  }
+}
+
+/* For Phones */
+@media (max-width: 600px) {
+  .page {
+    padding: 16px 10px; /* Reduce outside margins */
+  }
+  
+  .card, .history-card {
+    padding: 20px; /* Less interior padding */
+    border-radius: 16px;
+  }
+
+  .input-row {
+    flex-direction: column; /* Stack side-by-side inputs to vertical */
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .balance-section h1 {
+    font-size: 32px !important; /* Slightly smaller text */
+  }
+
+  .ai-reason-box {
+    flex-direction: column; /* Move icon above text on tiny screens */
+    align-items: flex-start;
+  }
+}

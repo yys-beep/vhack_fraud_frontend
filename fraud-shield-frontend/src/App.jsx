@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ShieldAlert, ShieldCheck, Send, User, Info, RefreshCw, History, Clock, Hash, Download, AlertTriangle } from 'lucide-react';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import './App.css';
 
 const API_URL = "https://vhack-fraud-backend.onrender.com"; 
@@ -26,10 +26,13 @@ function App() {
     doc.text('FraudShield Security Report', 14, 20);
     const tableColumn = ["Time", "From", "To", "Amount", "Status"];
     const tableRows = history.map(tx => [tx.time, tx.from, tx.to, `$${tx.amount.toLocaleString()}`, tx.status]);
-    doc.autoTable({ startY: 30, head: [tableColumn], body: tableRows });
+    
+    // THE MAGIC FIX IS ON THIS LINE:
+    autoTable(doc, { startY: 30, head: [tableColumn], body: tableRows });
+    
     doc.save('FraudShield_Report.pdf');
   };
-
+  
   const handleTransfer = async () => {
     setLoading(true);
     setAiResult(null);
@@ -178,26 +181,28 @@ function App() {
         </div>
       </div>
 
-      <div className="history-card">
-        <div style={{display:'flex', justifyContent:'space-between', marginBottom:'15px', alignItems:'center'}}>
-           <h3 style={{margin:0}}>Security Audit Log</h3>
-           <button onClick={downloadPDF} className="btn-secondary"><Download size={14}/> Export PDF</button>
+      <div>
+        <div className="history-card">
+          <div style={{display:'flex', justifyContent:'space-between', marginBottom:'15px', alignItems:'center'}}>
+            <h3 style={{margin:0}}>Security Audit Log</h3>
+            <button onClick={downloadPDF} className="btn-secondary"><Download size={14}/> Export PDF</button>
+          </div>
+          <table className="history-table">
+            <thead>
+              <tr><th>Time</th><th>To Account</th><th>Amount</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              {history.map((tx, i) => (
+                <tr key={i}>
+                  <td>{tx.time}</td>
+                  <td>{tx.to}</td>
+                  <td>${tx.amount.toLocaleString()}</td>
+                  <td><span className={tx.status === 'Approved' ? 'badge-approved' : 'badge-blocked'}>{tx.status}</span></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-        <table className="history-table">
-          <thead>
-            <tr><th>Time</th><th>To Account</th><th>Amount</th><th>Status</th></tr>
-          </thead>
-          <tbody>
-            {history.map((tx, i) => (
-              <tr key={i}>
-                <td>{tx.time}</td>
-                <td>{tx.to}</td>
-                <td>${tx.amount.toLocaleString()}</td>
-                <td><span className={tx.status === 'Approved' ? 'badge-approved' : 'badge-blocked'}>{tx.status}</span></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
       </div>
     </div>
   );
