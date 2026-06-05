@@ -2,6 +2,8 @@
 
 A modern React-based web application built with Vite for detecting and managing fraud cases. This frontend interfaces with a fraud detection backend system to provide users with real-time analysis, reporting, and case management capabilities.
 
+🌐 **[Click here to view the Live Website](https://vhackfrauddetect.netlify.app/)**
+
 ## 🎯 Project Overview
 
 **Fraud Shield Frontend** is part of the vhack fraud detection initiative. This application provides a user-friendly interface for:
